@@ -4,10 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { bookingsApi } from "../api/endpoints/bookings";
 import BookingStatusBadge from "../components/Bookings/BookingStatusBadge";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 const Bookings: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
+
+  // Inside the component:
+  const [searchParams] = useSearchParams();
+  const searchParam = searchParams.get("search") || "";
+
+  // Initialize filters with search param:
+  const [filters, setFilters] = useState({
+    status: "",
+    search: searchParam || "",
+    dateFrom: "",
+    dateTo: "",
+  });
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["bookings", page, limit],

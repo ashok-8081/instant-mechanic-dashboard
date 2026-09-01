@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ToastProvider, useToast } from './contexts/ToastContext';
 import { useSocket } from './hooks/useSocket';
 import Login from './pages/Login';
 import Layout from './components/layout/Layout';
@@ -27,23 +28,28 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return <>{children}</>;
 };
 
-const AppWithSocket: React.FC = () => {
+// Component that uses socket and toast - wrapped inside ToastProvider
+const SocketListener: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const socket = useSocket('http://localhost:5000');
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (socket) {
-            socket.on('booking-update', () => {
+            socket.on('booking-update', (data) => {
                 queryClient.invalidateQueries({ queryKey: ['dashboard'] });
                 queryClient.invalidateQueries({ queryKey: ['bookings'] });
+                showToast(`Booking ${data._id} was updated`, 'info');
             });
 
-            socket.on('mechanic-update', () => {
+            socket.on('mechanic-update', (data) => {
                 queryClient.invalidateQueries({ queryKey: ['dashboard'] });
                 queryClient.invalidateQueries({ queryKey: ['mechanics'] });
+                showToast(`Mechanic ${data.name} status updated`, 'info');
             });
 
             socket.on('dashboard-update', () => {
                 queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+                showToast('Dashboard updated with new data', 'success');
             });
 
             return () => {
@@ -52,35 +58,37 @@ const AppWithSocket: React.FC = () => {
                 socket.off('dashboard-update');
             };
         }
-    }, [socket]);
+    }, [socket, showToast]);
 
-    return (
-        <BrowserRouter>
-            <ThemeProvider>
-                <AuthProvider>
-                    <Routes>
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/" element={
-                            <ProtectedRoute>
-                                <Layout />
-                            </ProtectedRoute>
-                        }>
-                            <Route index element={<Dashboard />} />
-                            <Route path="bookings" element={<Bookings />} />
-                            <Route path="mechanics" element={<Mechanics />} />
-                            <Route path="customers" element={<Customers />} />
-                        </Route>
-                    </Routes>
-                </AuthProvider>
-            </ThemeProvider>
-        </BrowserRouter>
-    );
+    return <>{children}</>;
 };
 
 function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <AppWithSocket />
+            <BrowserRouter>
+                <ThemeProvider>
+                    <AuthProvider>
+                        <ToastProvider>
+                            <SocketListener>
+                                <Routes>
+                                    <Route path="/login" element={<Login />} />
+                                    <Route path="/" element={
+                                        <ProtectedRoute>
+                                            <Layout />
+                                        </ProtectedRoute>
+                                    }>
+                                        <Route index element={<Dashboard />} />
+                                        <Route path="bookings" element={<Bookings />} />
+                                        <Route path="mechanics" element={<Mechanics />} />
+                                        <Route path="customers" element={<Customers />} />
+                                    </Route>
+                                </Routes>
+                            </SocketListener>
+                        </ToastProvider>
+                    </AuthProvider>
+                </ThemeProvider>
+            </BrowserRouter>
         </QueryClientProvider>
     );
 }
