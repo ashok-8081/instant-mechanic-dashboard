@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* Light theme */
   --color-background: #ffffff;
   --color-foreground: #0a0a0a;
   --color-primary: #2563eb;
@@ -23,25 +24,26 @@
 }
 
 .dark {
-  --color-background: #0a0a0a;
-  --color-foreground: #ffffff;
-  --color-card: #1a1a1a;
-  --color-card-foreground: #ffffff;
-  --color-popover: #1a1a1a;
-  --color-popover-foreground: #ffffff;
-  --color-primary: #2563eb;
+  /* Dark theme - improved for better visibility */
+  --color-background: #111827;
+  --color-foreground: #f9fafb;
+  --color-primary: #3b82f6;
   --color-primary-foreground: #ffffff;
   --color-secondary: #1f2937;
-  --color-secondary-foreground: #ffffff;
+  --color-secondary-foreground: #f9fafb;
   --color-muted: #1f2937;
   --color-muted-foreground: #9ca3af;
   --color-accent: #1f2937;
-  --color-accent-foreground: #ffffff;
-  --color-destructive: #7f1d1d;
+  --color-accent-foreground: #f9fafb;
+  --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
   --color-border: #374151;
   --color-input: #374151;
-  --color-ring: #2563eb;
+  --color-ring: #3b82f6;
+  --color-card: #1f2937;
+  --color-card-foreground: #f9fafb;
+  --color-popover: #1f2937;
+  --color-popover-foreground: #f9fafb;
 }
 
 body {
@@ -65,4 +67,198 @@ body {
 
 .animate-in {
   animation: slide-in-from-right 0.3s ease-out;
+}
+
+/* Dark mode specific overrides for better visibility */
+.dark .bg-white {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1f2937 !important;
+}
+
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #4b5563 !important;
+}
+
+.dark .hover\:bg-gray-50:hover {
+  background-color: #1f2937 !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: #374151 !important;
+}
+
+/* Select dropdown in dark mode */
+.dark select {
+  background-color: #1f2937;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+.dark select option {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+/* Input fields in dark mode */
+.dark input,
+.dark textarea {
+  background-color: #1f2937;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #6b7280;
+}
+
+/* Table in dark mode */
+.dark table {
+  background-color: #1f2937;
+}
+
+.dark table thead th {
+  color: #9ca3af;
+  border-color: #374151;
+}
+
+.dark table tbody td {
+  color: #d1d5db;
+  border-color: #374151;
+}
+
+.dark table tbody tr:hover {
+  background-color: #374151;
+}
+
+/* Card in dark mode */
+.dark .card {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark .card-title {
+  color: #f9fafb;
+}
+
+/* Dropdown menu in dark mode */
+.dark .dropdown-menu {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark .dropdown-item {
+  color: #d1d5db;
+}
+
+.dark .dropdown-item:hover {
+  background-color: #374151;
+}
+
+/* Modal/Dialog in dark mode */
+.dark .modal-content {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+/* Badge colors in dark mode */
+.dark .bg-blue-100 {
+  background-color: #1e3a5f !important;
+  color: #93c5fd !important;
+}
+
+.dark .bg-green-100 {
+  background-color: #1a3a2a !important;
+  color: #86efac !important;
+}
+
+.dark .bg-yellow-100 {
+  background-color: #3d3a1a !important;
+  color: #fcd34d !important;
+}
+
+.dark .bg-red-100 {
+  background-color: #3d1a1a !important;
+  color: #fca5a5 !important;
+}
+
+.dark .bg-purple-100 {
+  background-color: #2d1a3d !important;
+  color: #c4b5fd !important;
+}
+
+.dark .bg-indigo-100 {
+  background-color: #1a1a3d !important;
+  color: #a5b4fc !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+/* Status badge text colors */
+.dark .text-yellow-800 {
+  color: #fcd34d !important;
+}
+
+.dark .text-blue-800 {
+  color: #93c5fd !important;
+}
+
+.dark .text-green-800 {
+  color: #86efac !important;
+}
+
+.dark .text-red-800 {
+  color: #fca5a5 !important;
+}
+
+.dark .text-purple-800 {
+  color: #c4b5fd !important;
+}
+
+.dark .text-indigo-800 {
+  color: #a5b4fc !important;
+}
+
+/* Stats cards in dark mode */
+.dark .stats-card {
+  background-color: #1f2937;
+}
+
+/* Chart colors in dark mode */
+.dark .recharts-cartesian-grid line {
+  stroke: #374151 !important;
+}
+
+.dark .recharts-text {
+  fill: #9ca3af !important;
+}
+
+.dark .recharts-legend-item-text {
+  color: #9ca3af !important;
 }
