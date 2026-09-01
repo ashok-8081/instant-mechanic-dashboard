@@ -9,11 +9,23 @@ const Bookings: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["bookings", page, limit],
     queryFn: () => bookingsApi.getBookings({ page, limit }),
     refetchInterval: 10000, // Auto-refresh every 10 seconds
   });
+
+  // Function to handle status update
+  const handleStatusUpdate = async (bookingId: string, newStatus: string) => {
+    try {
+      await bookingsApi.updateStatus(bookingId, newStatus);
+      // Refetch the data to show updated status
+      refetch();
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      alert("Failed to update booking status. Please try again.");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -73,6 +85,9 @@ const Bookings: React.FC = () => {
                   Status
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
+                  Update Status
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
                   Amount
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
@@ -103,6 +118,22 @@ const Bookings: React.FC = () => {
                   </td>
                   <td className="py-3 px-4">
                     <BookingStatusBadge status={booking.status} />
+                  </td>
+                  <td className="py-3 px-4">
+                    <select
+                      value={booking.status}
+                      onChange={(e) =>
+                        handleStatusUpdate(booking._id, e.target.value)
+                      }
+                      className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="ASSIGNED">Assigned</option>
+                      <option value="MECHANIC_ON_WAY">On The Way</option>
+                      <option value="IN_PROGRESS">In Progress</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
                   </td>
                   <td className="py-3 px-4 text-sm font-medium">
                     ${booking.amount.toFixed(2)}
