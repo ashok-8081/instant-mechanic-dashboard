@@ -9,7 +9,7 @@ export enum MechanicStatus {
 }
 
 export interface IMechanic extends Document {
-    userId: string;
+    userId?: string;  // Make this optional with ?
     name: string;
     email: string;
     phone: string;
@@ -28,8 +28,9 @@ const MechanicSchema = new Schema<IMechanic>(
     {
         userId: {
             type: String,
-            required: true,
-            unique: true
+            unique: true,
+            sparse: true,  // Allow null/undefined values
+            required: false  // Make it NOT required
         },
         name: {
             type: String,

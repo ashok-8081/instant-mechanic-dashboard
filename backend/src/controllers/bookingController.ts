@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Booking, BookingStatus } from '../models/Booking';
 import { Mechanic, MechanicStatus } from '../models/Mechanic';
+import mongoose from 'mongoose';
 
 export const getBookings = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -31,9 +32,8 @@ export const getBookings = async (req: Request, res: Response): Promise<void> =>
             if (dateTo) filter.createdAt.$lte = new Date(dateTo as string);
         }
 
-        // If search, we need to find matching customers/vehicles first
+        // If search, use aggregation
         if (search) {
-            // We'll handle search differently with aggregation
             const bookings = await Booking.aggregate([
                 {
                     $lookup: {
@@ -93,11 +93,11 @@ export const getBookings = async (req: Request, res: Response): Promise<void> =>
             ]);
 
             const result = bookings[0];
-            const total = result.metadata[0]?.total || 0;
+            const total = result?.metadata?.[0]?.total || 0;
 
             res.json({
                 success: true,
-                data: result.data,
+                data: result?.data || [],
                 pagination: {
                     page: Number(page),
                     limit: take,
@@ -143,7 +143,18 @@ export const getBookings = async (req: Request, res: Response): Promise<void> =>
 
 export const getBookingById = async (req: Request, res: Response): Promise<void> => {
     try {
-        const booking = await Booking.findById(req.params.id)
+        const { id } = req.params;
+
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid booking ID format'
+            });
+            return;
+        }
+
+        const booking = await Booking.findById(id)
             .populate('customerId', 'name email phone address')
             .populate('vehicleId', 'make model year licensePlate color')
             .populate('serviceId', 'name category basePrice duration')
@@ -172,11 +183,19 @@ export const getBookingById = async (req: Request, res: Response): Promise<void>
     }
 };
 
-// Rest of the controller remains the same...
 export const updateBookingStatus = async (req: Request, res: Response): Promise<void> => {
     try {
         const { status } = req.body;
         const { id } = req.params;
+
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid booking ID format'
+            });
+            return;
+        }
 
         if (!Object.values(BookingStatus).includes(status)) {
             res.status(400).json({
@@ -193,12 +212,7 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
                 completedAt: status === BookingStatus.COMPLETED ? new Date() : undefined
             },
             { new: true }
-        )
-            .populate('customerId', 'name email')
-            .populate('vehicleId', 'make model licensePlate')
-            .populate('serviceId', 'name category')
-            .populate('mechanicId', 'name email status')
-            .lean();
+        );
 
         if (!booking) {
             res.status(404).json({
@@ -207,6 +221,14 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
             });
             return;
         }
+
+        // Populate the booking after update
+        const populatedBooking = await Booking.findById(booking._id)
+            .populate('customerId', 'name email')
+            .populate('vehicleId', 'make model licensePlate')
+            .populate('serviceId', 'name category')
+            .populate('mechanicId', 'name email status')
+            .lean();
 
         // Update mechanic status if assigned
         if (booking.mechanicId && status === BookingStatus.IN_PROGRESS) {
@@ -222,9 +244,20 @@ export const updateBookingStatus = async (req: Request, res: Response): Promise<
             });
         }
 
+        // Broadcast update via WebSocket
+        try {
+            const io = req.app.get('io');
+            if (io) {
+                io.emit('booking-update', populatedBooking);
+                io.emit('dashboard-update', { type: 'booking', data: populatedBooking });
+            }
+        } catch (error) {
+            console.log('WebSocket broadcast not available');
+        }
+
         res.json({
             success: true,
-            data: booking
+            data: populatedBooking
         });
     } catch (error) {
         const err = error as Error;
@@ -248,22 +281,45 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
             note
         } = req.body;
 
+        // Validate ObjectIds
+        if (!mongoose.Types.ObjectId.isValid(customerId) ||
+            !mongoose.Types.ObjectId.isValid(vehicleId) ||
+            !mongoose.Types.ObjectId.isValid(serviceId)) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid ID format'
+            });
+            return;
+        }
+
         const booking = await Booking.create({
             customerId,
             vehicleId,
             serviceId,
-            mechanicId,
+            mechanicId: mechanicId && mongoose.Types.ObjectId.isValid(mechanicId) ? mechanicId : undefined,
             scheduledAt: new Date(scheduledAt),
             amount,
             note,
             status: BookingStatus.PENDING
         });
 
-        const populatedBooking = await Booking.findById(booking.id)
+        const populatedBooking = await Booking.findById(booking._id)
             .populate('customerId', 'name email')
             .populate('vehicleId', 'make model licensePlate')
             .populate('serviceId', 'name category')
-            .populate('mechanicId', 'name email');
+            .populate('mechanicId', 'name email')
+            .lean();
+
+        // Broadcast new booking via WebSocket
+        try {
+            const io = req.app.get('io');
+            if (io) {
+                io.emit('booking-update', populatedBooking);
+                io.emit('dashboard-update', { type: 'booking', data: populatedBooking });
+            }
+        } catch (error) {
+            console.log('WebSocket broadcast not available');
+        }
 
         res.status(201).json({
             success: true,
