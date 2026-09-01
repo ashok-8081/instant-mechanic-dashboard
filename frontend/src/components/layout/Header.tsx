@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bell, Search } from 'lucide-react';
 import LiveIndicator from '../LiveIndicator';
+import ThemeToggle from '../ThemeToggle';
 
 interface HeaderProps {
     title: string;
@@ -8,10 +9,10 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title }) => {
     return (
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
+                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{title}</h1>
                     <LiveIndicator />
                 </div>
                 
@@ -21,13 +22,14 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
                         <input
                             type="text"
                             placeholder="Search..."
-                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                            className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         />
                     </div>
-                    <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <button className="relative p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                         <Bell size={20} />
                         <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </button>
+                    <ThemeToggle />
                 </div>
             </div>
         </header>

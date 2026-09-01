@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { useSocket } from './hooks/useSocket';
 import Login from './pages/Login';
 import Layout from './components/layout/Layout';
@@ -31,24 +32,17 @@ const AppWithSocket: React.FC = () => {
 
     useEffect(() => {
         if (socket) {
-            // Listen for booking updates
-            socket.on('booking-update', (data) => {
-                console.log('Booking updated:', data);
-                // Invalidate queries to refresh data
+            socket.on('booking-update', () => {
                 queryClient.invalidateQueries({ queryKey: ['dashboard'] });
                 queryClient.invalidateQueries({ queryKey: ['bookings'] });
             });
 
-            // Listen for mechanic updates
-            socket.on('mechanic-update', (data) => {
-                console.log('Mechanic updated:', data);
+            socket.on('mechanic-update', () => {
                 queryClient.invalidateQueries({ queryKey: ['dashboard'] });
                 queryClient.invalidateQueries({ queryKey: ['mechanics'] });
             });
 
-            // Listen for dashboard updates
-            socket.on('dashboard-update', (data) => {
-                console.log('Dashboard update:', data);
+            socket.on('dashboard-update', () => {
                 queryClient.invalidateQueries({ queryKey: ['dashboard'] });
             });
 
@@ -62,21 +56,23 @@ const AppWithSocket: React.FC = () => {
 
     return (
         <BrowserRouter>
-            <AuthProvider>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={
-                        <ProtectedRoute>
-                            <Layout />
-                        </ProtectedRoute>
-                    }>
-                        <Route index element={<Dashboard />} />
-                        <Route path="bookings" element={<Bookings />} />
-                        <Route path="mechanics" element={<Mechanics />} />
-                        <Route path="customers" element={<Customers />} />
-                    </Route>
-                </Routes>
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/" element={
+                            <ProtectedRoute>
+                                <Layout />
+                            </ProtectedRoute>
+                        }>
+                            <Route index element={<Dashboard />} />
+                            <Route path="bookings" element={<Bookings />} />
+                            <Route path="mechanics" element={<Mechanics />} />
+                            <Route path="customers" element={<Customers />} />
+                        </Route>
+                    </Routes>
+                </AuthProvider>
+            </ThemeProvider>
         </BrowserRouter>
     );
 };
