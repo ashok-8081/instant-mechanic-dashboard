@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use environment variable with fallback for local development
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || 'http://localhost:5000/api';
 
 console.log('API URL:', API_URL); // This will help debug
 
