@@ -19,6 +19,7 @@ interface Mechanic {
     latitude?: number;
     longitude?: number;
     status: string;
+    specialization?: string;  // Add this
     currentBooking?: {
         customerId: { name: string };
         serviceId: { name: string };

@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// TEMPORARILY HARDCODE - This WILL work
-const API_URL = 'http://13.60.40.245:5000/api';
-
-console.log('API URL:', API_URL);
+// Change this from EC2 URL to Vercel's own API
+const API_URL = '/api';  // This calls Vercel's serverless function
 
 const apiClient = axios.create({
     baseURL: API_URL,
@@ -12,7 +10,7 @@ const apiClient = axios.create({
     },
 });
 
-// Add token to requests
+// Rest of the code remains the same...
 apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -24,7 +22,6 @@ apiClient.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Handle 401 responses
 apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
