@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// Use environment variable with fallback for local development
-const API_URL = (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL || 'http://localhost:5000/api';
+// TEMPORARILY HARDCODE - This WILL work
+const API_URL = 'http://13.60.40.245:5000/api';
 
-console.log('API URL:', API_URL); // This will help debug
+console.log('API URL:', API_URL);
 
 const apiClient = axios.create({
     baseURL: API_URL,
